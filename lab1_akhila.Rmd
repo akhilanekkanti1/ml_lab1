@@ -100,11 +100,20 @@ cv_split <- cv_split %>%
 
 
 cv_split <- cv_split %>% 
-  map(splits, ~mutate(.x) %>% )
+  mutate(sped_p = pmap()
 
 cv_split$splits[[1]]$data$sp_ed_fg
 
+d <- d %>% 
+  mutate(sped_p = )
 
+(cv_split$splits[[1]]$data$sp_ed_fg)
+
+cv_split$splits[[1]]$data %>% 
+  group_by(sp_ed_fg) %>% 
+  summarize(n = n()) %>% 
+  filter(sp_ed_fg == 'Y') %>% 
+  mutate(freq = n/sum(n))
 
 
 ```
