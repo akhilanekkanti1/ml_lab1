@@ -17,12 +17,17 @@ knitr::opts_chunk$set(echo = FALSE,
 
 library(tidyverse)
 library(tidymodels)
+library(dplyr)
+library(rio)
+library(here)
+
 ```
 
 ### Read in the `train.csv` data.
 
 ```{r, data}
 
+d <- import(here("data", "train.csv"))
 
 ```
 
@@ -31,14 +36,36 @@ library(tidymodels)
 Split the data into a training set and a testing set as two named objects. Produce the `class` type for the initial split object and the training and test sets.
 
 ```{r, initial_split}
+
 set.seed(3000)
+
+
+(d_split <- initial_split(d)) #sets the proportions 75/25 for train/test
+
+d_split %>% 
+  training() %>% 
+  nrow() / nrow(d) #check what percent of intial daaset is training
+
+class(d_split)
+
+#create separate datasets
+d_train <- training(d_split)
+d_test  <- testing(d_split)
 
 ```
 
 ### 2. Use code to show the proportion of the `train.csv` data that went to each of the training and test sets.
 
 ```{r}
+#proportion for train
+d_split %>% 
+  training() %>% 
+  nrow() / nrow(d) 
 
+#proportion for test
+d_split %>% 
+  testing() %>% 
+  nrow() / nrow(d) 
 
 ```
 
@@ -48,6 +75,9 @@ Use 10-fold cross-validation to resample the training data.
 
 ```{r, resample}
 set.seed(3000)
+
+cv_split <- vfold_cv(d_train, v = 10)
+
 
 ```
 
@@ -59,6 +89,15 @@ set.seed(3000)
 * *sped_p* = the proportion of students receiving special education services (`sp_ed_fg`) in the analysis and assessment sets for each fold
 
 ```{r, purrr}
+
+cv_split[[1]]
+
+cv_split <- cv_split %>%
+  mutate(analysis_n = map_dbl(splits, ~analysis(.x) %>% nrow())) 
+
+View(cv_split$splits[[1]])
+
+
 
 
 ```
