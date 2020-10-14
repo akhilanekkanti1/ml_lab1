@@ -28,6 +28,8 @@ library(here)
 ```{r, data}
 
 d <- import(here("data", "train.csv"))
+d <- d %>%  sample_frac(.5)
+
 
 ```
 
@@ -90,12 +92,17 @@ cv_split <- vfold_cv(d_train, v = 10)
 
 ```{r, purrr}
 
-cv_split[[1]]
-
 cv_split <- cv_split %>%
-  mutate(analysis_n = map_dbl(splits, ~analysis(.x) %>% nrow())) 
+  mutate(analysis_n = map_dbl(splits, ~analysis(.x) %>% nrow()),
+         assessment_n = map_dbl(splits, ~assessment(.x) %>%  nrow()),
+         analysis_p = analysis_n / (analysis_n + assessment_n),
+         assessment_p = assessment_n / (analysis_n + assessment_n))
 
-View(cv_split$splits[[1]])
+
+cv_split <- cv_split %>% 
+  map(splits, ~mutate(.x) %>% )
+
+cv_split$splits[[1]]$data$sp_ed_fg
 
 
 
