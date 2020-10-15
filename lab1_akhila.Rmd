@@ -28,7 +28,7 @@ library(here)
 ```{r, data}
 
 d <- import(here("data", "train.csv"))
-d <- d %>%  sample_frac(.5)
+d <- d %>%  sample_frac(.2)
 
 
 ```
@@ -99,20 +99,28 @@ cv_split <- cv_split %>%
          assessment_p = assessment_n / (analysis_n + assessment_n))
 
 
-cv_split <- cv_split %>% 
-  mutate(sped_p = pmap()
+# My attempt at using the first split.
+# jp_split <- cv_split %>% 
+#   mutate(first_split = pmap(list(cv_split$splits[[1]]$data,
+#                                  analysis_n,
+#                                  assessment_n),
+#          ~summarize(mean_sp_ed_fg = mean(sp_ed_fg),
+#                     sped_p_analysis = mean_sp_ed_fg/analysis_n,
+#                     sped_p_assessment = mean_sp_ed_fg/assessment_n)))
+           
 
-cv_split$splits[[1]]$data$sp_ed_fg
+str(cv_split)
+str(cv_split$splits[[1]]$data)
 
-d <- d %>% 
-  mutate(sped_p = )
+# d <- d %>% 
+#   mutate(sped_p = )
 
-(cv_split$splits[[1]]$data$sp_ed_fg)
+# cv_split$splits[[1]]$data$sp_ed_fg == 'Y'
+# cv_split$splits[[1]]$data$sp_ed_fg
 
 cv_split$splits[[1]]$data %>% 
-  group_by(sp_ed_fg) %>% 
+  group_by(sp_ed_fg %in%('Y')) %>% 
   summarize(n = n()) %>% 
-  filter(sp_ed_fg == 'Y') %>% 
   mutate(freq = n/sum(n))
 
 
