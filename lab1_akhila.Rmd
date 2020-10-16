@@ -96,18 +96,19 @@ cv_split <- cv_split %>%
   mutate(analysis_n = map_dbl(splits, ~analysis(.x) %>% nrow()),
          assessment_n = map_dbl(splits, ~assessment(.x) %>%  nrow()),
          analysis_p = analysis_n / (analysis_n + assessment_n),
-         assessment_p = assessment_n / (analysis_n + assessment_n))
+         assessment_p = assessment_n / (analysis_n + assessment_n),
+         sped_p = map_dbl(splits, ~prop.table(table(.x$d$sp_ed_fg))[["Y"]]))
 
 
 # My attempt at using the first split.
-# jp_split <- cv_split %>% 
-#   mutate(first_split = pmap(list(cv_split$splits[[1]]$data,
-#                                  analysis_n,
-#                                  assessment_n),
-#          ~summarize(mean_sp_ed_fg = mean(sp_ed_fg),
-#                     sped_p_analysis = mean_sp_ed_fg/analysis_n,
-#                     sped_p_assessment = mean_sp_ed_fg/assessment_n)))
-           
+jp_split <- cv_split %>%
+  mutate(analysis_n = map_dbl(splits, ~analysis(.x) %>% nrow()),
+         assessment_n = map_dbl(splits, ~assessment(.x) %>%  nrow()),
+         analysis_p = analysis_n / (analysis_n + assessment_n),
+         assessment_p = assessment_n / (analysis_n + assessment_n),
+         sped_p_analysis = map(splits, ~prop.table(table(.x$d$sp_ed_fg))[["Y"]]/analysis_n),
+         sped_p_assessment = map(splits, ~prop.table(table(.x$d$sp_ed_fg))[["Y"]]/assessment_n))
+  
 
 str(cv_split)
 str(cv_split$splits[[1]]$data)
@@ -119,6 +120,11 @@ str(cv_split$splits[[1]]$data)
 # cv_split$splits[[1]]$data$sp_ed_fg
 
 cv_split$splits[[1]]$data %>% 
+  group_by(sp_ed_fg %in%('Y')) %>% 
+  summarize(n = n()) %>% 
+  mutate(freq = n/sum(n))
+
+cv_split$splits[[2]]$data %>% 
   group_by(sp_ed_fg %in%('Y')) %>% 
   summarize(n = n()) %>% 
   mutate(freq = n/sum(n))
