@@ -105,8 +105,9 @@ cv_split <- cv_split %>%
 # sped_p_analysis = pmap(list(splits, .), ~prop.table(table(..1$..2$sp_ed_fg))[["Y"]]/analysis_n))
   
 
-# cv_split$splits[[1]]$data$sp_ed_fg == 'Y'
-cv_split$splits[[1]]$data$sp_ed_fg
+# cv_split$splits[[1]]$d$sp_ed_fg
+# cv_split$splits[[1]]$d$sp_ed_fg == 'Y'
+
 
 # cv_split$splits[[1]]$data %>% 
 #   group_by(sp_ed_fg %in%('Y')) %>% 
@@ -129,7 +130,13 @@ attempt <- cv_split %>%
 cv_split$splits[[1]] %>% 
   assessment()
 
+#Fold 1 & 2
 assessment(cv_split$splits[[1]])$id
+
+#Shaina's (failed) attempt
+length(unique(assessment(cv_split$splits[[1]])$id, assessment(cv_split$splits[[2]])$id))
+
+length(assessment(cv_split$splits[[1]])$id) 
 
 
 ```
