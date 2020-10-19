@@ -179,8 +179,12 @@ assessment(mc_split$splits[[1]]) %>%
 
 ```{r}
 
-length(intersect(assessment(cv_split$splits[[1]])$id,
-                assessment(cv_split$splits[[2]])$id))
+length(intersect(assessment(mc_split$splits[[8]])$id,
+                assessment(mc_split$splits[[12]])$id))
+
+length(intersect(assessment(mc_split$splits[[2]])$id,
+                assessment(mc_split$splits[[20]])$id))
+
 
 ```
 
