@@ -1,13 +1,16 @@
 ---
 title: "Lab 1"
-subtitle: "Resampling"
-date: "Assigned 10/14/20, Due 10/21/20"
+author: "Shaina Trevino, Akhila Nekkanti, Jonathan Pedroza"
 output:
-  html_document: 
-    toc: true
-    toc_float: true
-    theme: "journal"
-    css: "website-custom.css"
+  pdf_document:
+    toc: yes
+  html_document:
+    css: website-custom.css
+    theme: journal
+    toc: yes
+    toc_float: yes
+date: "Assigned 10/14/20, Due 10/21/20"
+subtitle: Resampling
 ---
 
 ```{r setup, include=FALSE}
@@ -131,14 +134,14 @@ cv_split <- cv_split %>%
 #   assessment()
 
 #Fold 1 & 2
-assessment(cv_split$splits[[1]])$id
+#assessment(cv_split$splits[[1]])$id
 
 #Shaina's (failed) attempt
-length(unique(assessment(cv_split$splits[[1]])$id, assessment(cv_split$splits[[2]])$id))
+#length(unique(assessment(cv_split$splits[[1]])$id, assessment(cv_split$splits[[2]])$id))
 
-length(assessment(cv_split$splits[[1]])$id) 
+#length(assessment(cv_split$splits[[1]])$id) 
 
-#akhila's attempt -- intersect instead of unique from Shaina's attempt above
+#final attempt -- intersect instead of unique from Shaina's attempt above
 length(intersect(assessment(cv_split$splits[[1]])$id,
                 assessment(cv_split$splits[[2]])$id))
 
@@ -160,7 +163,6 @@ For the following code `vfold_cv(fictional_train, v = 20)`:
 ```{r}
 set.seed(3000)
 
-# ?mc_cv()
 
 mc_split <- mc_cv(d_train, prop = 0.70, times = 20)
 
@@ -191,21 +193,31 @@ length(intersect(assessment(mc_split$splits[[2]])$id,
 ### 9. You plan on doing bootstrap resampling with a training set with *n* = 500.
 
 * What is the sample size of an analysis set for a given bootstrap resample?
-  Answer: Analysis n is the same as the total n. So, sample size of analysis set is 500.
-  
+  Answer: The analysis set in a bootstrap sample is always the same as the total n, so the analysis set has a sample size of 500.
+
 * What is the sample size of an assessment set for a given bootstrap resample?
+  Answer: The assessment set in a bootstrap resample has an n of `r (.36)*(500)`
+  
 * If each row was selected only once for an analysis set:
   + what would be the size of the analysis set?
+    Answer: On average, 63.21% of the original sample ends up in a bootstrap sample, so n = `r (.6321)*(500)`
+
   + and what would be the size of the assessment set?
-  
+    Answer: The assessment set has an n of `r (1-.6321)*(500)`
+
 ```{r}
-set.seed(3000)
 
-boot_split <- bootstraps(d_train, times = 500)
+#bootstrap resample analysis set
+500
 
-boot_split$splits[[1]]
-  
+#bootstrap resample assessment set
+(.36)*(500)
 
+# no resample analysis set
+(.6321)*(500)
+
+#no resample assessment set
+(1-.6321)*(500)
 
 ```
-  
+
