@@ -124,11 +124,11 @@ cv_split <- cv_split %>%
 ### 5. Please demonstrate that that there are **no** common values in the `id` columns of the `assessment` data between `Fold01` & `Fold02`, and `Fold09` & `Fold10` (of your 10-fold cross-validation object).
 
 ```{r}
-attempt <- cv_split %>% 
-  mutate(id_validation = map(splits, ~))
-
-cv_split$splits[[1]] %>% 
-  assessment()
+# attempt <- cv_split %>% 
+#   mutate(id_validation = map(splits, ~))
+# 
+# cv_split$splits[[1]] %>% 
+#   assessment()
 
 #Fold 1 & 2
 assessment(cv_split$splits[[1]])$id
@@ -137,6 +137,13 @@ assessment(cv_split$splits[[1]])$id
 length(unique(assessment(cv_split$splits[[1]])$id, assessment(cv_split$splits[[2]])$id))
 
 length(assessment(cv_split$splits[[1]])$id) 
+
+#akhila's attempt -- intersect instead of unique from Shaina's attempt above
+length(intersect(assessment(cv_split$splits[[1]])$id,
+                assessment(cv_split$splits[[2]])$id))
+
+length(intersect(assessment(cv_split$splits[[9]])$id,
+                assessment(cv_split$splits[[10]])$id))
 
 
 ```
