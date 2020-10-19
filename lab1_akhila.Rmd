@@ -191,8 +191,21 @@ length(intersect(assessment(mc_split$splits[[2]])$id,
 ### 9. You plan on doing bootstrap resampling with a training set with *n* = 500.
 
 * What is the sample size of an analysis set for a given bootstrap resample?
+  Answer: Analysis n is the same as the total n. So, sample size of analysis set is 500.
+  
 * What is the sample size of an assessment set for a given bootstrap resample?
 * If each row was selected only once for an analysis set:
   + what would be the size of the analysis set?
   + and what would be the size of the assessment set?
+  
+```{r}
+set.seed(3000)
+
+boot_split <- bootstraps(d_train, times = 500)
+
+boot_split$splits[[1]]
+  
+
+
+```
   
