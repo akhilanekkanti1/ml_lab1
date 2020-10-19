@@ -160,6 +160,18 @@ For the following code `vfold_cv(fictional_train, v = 20)`:
 ```{r}
 set.seed(3000)
 
+# ?mc_cv()
+
+mc_split <- mc_cv(d_train, prop = 0.70, times = 20)
+
+#proportion in analysis
+analysis(mc_split$splits[[1]]) %>% 
+  nrow() / nrow(mc_split$splits[[1]]$data)
+
+#propotion in assessment
+assessment(mc_split$splits[[1]]) %>% 
+  nrow() / nrow(mc_split$splits[[1]]$data)
+
 
 ```
 
@@ -167,6 +179,8 @@ set.seed(3000)
 
 ```{r}
 
+length(intersect(assessment(cv_split$splits[[1]])$id,
+                assessment(cv_split$splits[[2]])$id))
 
 ```
 
