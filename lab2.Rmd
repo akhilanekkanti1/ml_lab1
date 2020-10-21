@@ -19,6 +19,8 @@ library(here)
 library(dplyr)
 library(rio)
 
+options(scipen = 999)
+
 ```
 
 ## Read in the `train.csv` data. Please feel free to use `sample_frac()` if you find that the data file is too large for your machine.
@@ -114,14 +116,22 @@ lasso4_fit_1 <- tune_grid(
 ### Question A
   + How many models were fit to each fold of `lasso4_fit_1`? (Please provide a numeric answer, *and* use code to corroborate your answer.)
   
+  
+  
 ```{r}
-
+lasso4_fit_1 %>% 
+  collect_metrics(summarize = FALSE) %>% 
+  filter(.metric == "rmse") %>% 
+  count(id)
 ```
 
   + Use code to list the different values of `penalty()` that were used.
 
 ```{r}
-
+lasso4_fit_1 %>% 
+  collect_metrics() %>% 
+  filter(.metric == "rmse") %>% 
+  pull(penalty) #pulls a vector
 
 ```
 
@@ -132,12 +142,13 @@ Use your code from (5) above to complete the code maze below to fit a second tun
 ```{r, lasso_fit_2}
 
 lasso4_fit_2 <- tune_grid(
-  ____,
-  preprocessor = ____,
-  resamples = ____,
+  mod_lasso,
+  preprocessor = lasso4_rec,
+  resamples = cv_split,
   control = tune::control_resamples(verbose = TRUE,
                                     save_pred = TRUE)
 )
+
 
 ```
 
@@ -146,24 +157,60 @@ lasso4_fit_2 <- tune_grid(
   + How many models were fit to each fold of `lasso4_fit_2`? (Please provide a numeric answer, *and* use code to corroborate your answer.)
 
 ```{r}
+lasso4_fit_2 %>% 
+  collect_metrics(summarize = FALSE) %>% 
+  filter(.metric == "rmse") %>% 
+  count(id)
 
 
 ```
 
   + If this is different than the number of models of `lasso4_fit_1`, please explain why.
 
++ **No they are the same. We set levels = 10 for the first lasso_fit and did not set levels for the second one so the default of 10 was used. Therefore, there are the same number of models that were fit.**
+
   + Use code to list the different values of `penalty()` that were used for *lasso4_fit_2*.
 
 ```{r}
 
+p1 <- lasso4_fit_1 %>% 
+  collect_metrics(summarize = FALSE) %>% 
+  filter(.metric == "rmse") %>% 
+  pull(penalty)
+
+
+p2 <- lasso4_fit_2 %>% 
+  collect_metrics(summarize = FALSE) %>% 
+  filter(.metric == "rmse") %>% 
+  pull(penalty)
+
+data.frame(p1, p2)
 
 ```
 
 ## 7. Complete the necessary steps to create and fit a tuned lasso model that has seven or more predictors (use any tuning grid you like). Note that you will need to create a new recipe as well.
 
 ```{r, lasso8}
+#Recipe
+lasso7_rec <- 
+  recipe(
+    formula = score ~ enrl_grd + econ_dsvntg + sp_ed_fg + migrant_ed_fg + gndr + ethnic_cd + trgt_assist_fg, 
+    data = d_train #use your training set here
+  ) %>%
+  step_naomit(everything(), skip = TRUE) %>% 
+  step_string2factor(econ_dsvntg, sp_ed_fg, migrant_ed_fg, gndr, ethnic_cd, trgt_assist_fg) %>% 
+  step_dummy(econ_dsvntg, sp_ed_fg, migrant_ed_fg, gndr, ethnic_cd, trgt_assist_fg) %>% 
+  step_normalize(enrl_grd) 
 
-
+#Tuned grid
+lasso7_fit_1 <- tune_grid(
+  mod_lasso,
+  preprocessor = lasso7_rec,
+  resamples = cv_split,
+  grid = 5,
+  control = tune::control_resamples(verbose = TRUE,
+                                    save_pred = TRUE)
+)
 
 
 ```
@@ -171,6 +218,11 @@ lasso4_fit_2 <- tune_grid(
 ## 8. Compare the metrics from the best lasso model with 4 predictors to the best lasso model with 7+ predicors. Which is best?
 
 ```{r}
+l4 <- lasso4_fit_2 %>% select_best(metric = "rmse") 
+
+l7 <- lasso7_fit_1 %>% select_best(metric = "rmse")
+
+data.frame(l4, l7)
 
 ```
 
