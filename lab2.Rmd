@@ -1,6 +1,7 @@
 ---
 title: "Lab 2"
 subtitle: "Penalized Regression"
+author: "Shaina Trevino, Akhila Nekkanti, Johnathan Pedroza" 
 date: "Assigned 4/21/20, Due 4/28/20"
 output:
   html_document: 
@@ -116,6 +117,7 @@ lasso4_fit_1 <- tune_grid(
 ### Question A
   + How many models were fit to each fold of `lasso4_fit_1`? (Please provide a numeric answer, *and* use code to corroborate your answer.)
   
+  + *There were 10 models fit for each fold*
   
   
 ```{r}
@@ -155,6 +157,8 @@ lasso4_fit_2 <- tune_grid(
 ### Question B
 
   + How many models were fit to each fold of `lasso4_fit_2`? (Please provide a numeric answer, *and* use code to corroborate your answer.)
+  
+  + *10 models for each fold were fit*
 
 ```{r}
 lasso4_fit_2 %>% 
@@ -167,7 +171,7 @@ lasso4_fit_2 %>%
 
   + If this is different than the number of models of `lasso4_fit_1`, please explain why.
 
-+ **No they are the same. We set levels = 10 for the first lasso_fit and did not set levels for the second one so the default of 10 was used. Therefore, there are the same number of models that were fit.**
++ *No they are the same. We set levels = 10 for the first lasso_fit and did not set levels for the second one so the default of 10 was used. Therefore, there are the same number of models that were fit for each fold.*
 
   + Use code to list the different values of `penalty()` that were used for *lasso4_fit_2*.
 
@@ -217,10 +221,12 @@ lasso7_fit_1 <- tune_grid(
 
 ## 8. Compare the metrics from the best lasso model with 4 predictors to the best lasso model with 7+ predicors. Which is best?
 
-```{r}
-l4 <- lasso4_fit_2 %>% select_best(metric = "rmse") 
++ *Even with just 5 penalty values, the 7 predictor model was better than the 4 predictor model (see rmse below). Although the rmse is not vastly lower, so the model with less predictors could be preferred.*
 
-l7 <- lasso7_fit_1 %>% select_best(metric = "rmse")
+```{r}
+l4 <- lasso4_fit_2 %>% show_best(metric = "rmse", n = 1) %>% select(penalty, mean, .config)
+
+l7 <- lasso7_fit_1 %>% show_best(metric = "rmse", n = 1) %>% select(penalty, mean, .config)
 
 data.frame(l4, l7)
 
@@ -231,9 +237,34 @@ data.frame(l4, l7)
   + Use the same recipe from (7) above
   + Create and apply a regular grid for the elastic net model
   + Compare the metrics from the elastic net model to the best lasso model from (8). Which would you choose for your final model? What are the best hyperparameters for that model?
+  
+  + *The final model we would choose is the lasso model because they fit is very similar and the enet model is pretty much mimicing the lasso model. The lasso model has less penalties and is more interpretable.*
 
-```{r}
+```{r enet}
 
+mod_enet <- linear_reg() %>%
+             set_engine("glmnet") %>%
+             set_mode("regression") %>%
+             set_args(penalty = tune(), # tune penalty
+             mixture = tune()) # specifies a enet model
+
+enet_params <- parameters(penalty(), mixture())
+enet_grid <- grid_regular(enet_params, levels = c(10, 5))
+
+#fit
+enet_fit_1 <- tune_grid(
+  mod_enet,
+  preprocessor = lasso7_rec,
+  resamples = cv_split,
+  grid = enet_grid,
+  control = tune::control_resamples(verbose = TRUE,
+                                    save_pred = TRUE)
+)
+
+#compare
+e1 <- enet_fit_1 %>% show_best(metric = "rmse", n = 1) %>% select(penalty, mixture, mean, .config)
+
+data.frame(e1, l7)
 
 ```
 
