@@ -15,12 +15,18 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
 library(tidymodels)
+library(here)
+library(dplyr)
+library(rio)
+
 ```
 
 ## Read in the `train.csv` data. Please feel free to use `sample_frac()` if you find that the data file is too large for your machine.
 
 ```{r, data}
 
+d <- import(here("data", "train.csv"))
+d <- d %>%  sample_frac(.2)
 
 ```
 
@@ -30,7 +36,12 @@ library(tidymodels)
 Set a seed and split the data into a training set and a testing set as two named objects. 
 
 ```{r, initial_split}
+set.seed(3001)
 
+d_split <- initial_split(d)
+
+d_train <- training(d_split)
+d_test  <- testing(d_split)
 
 ```
 
@@ -39,7 +50,9 @@ Set a seed and split the data into a training set and a testing set as two named
 Set a seed and use 10-fold cross-validation to resample the traning data.
 
 ```{r, resample}
+set.seed(3001)
 
+cv_split <- vfold_cv(d_train, v = 10)
 
 ```
 
@@ -55,13 +68,13 @@ Complete the code maze below by filling in the blanks (____) to create a recipe 
 
 lasso4_rec <- 
   recipe(
-    formula = ____, 
-    data = ____ #use your training set here
+    formula = score ~ enrl_grd + econ_dsvntg + sp_ed_fg + migrant_ed_fg, 
+    data = d_train #use your training set here
   ) %>%
   step_naomit(everything(), skip = TRUE) %>% 
-  step_string2factor() %>%  #may not need, depending on your formula
-  step_dummy() %>% #may not need, depending on your formula
-  step_normalize() #may not need, depending on your formula
+  step_string2factor(econ_dsvntg, sp_ed_fg, migrant_ed_fg) %>% 
+  step_dummy(econ_dsvntg, sp_ed_fg, migrant_ed_fg) %>% 
+  step_normalize(enrl_grd) 
 
 ```
 
@@ -71,7 +84,11 @@ Create a `{parsnip}` lasso model where the penalty hyperparameter is set to be t
 
 ```{r, lasso}
 
-
+mod_lasso <- linear_reg() %>%
+             set_engine("glmnet") %>%
+             set_mode("regression") %>%
+             set_args(penalty = tune(), # tune penalty
+             mixture = 1) # specifies a lasso model
 
 ```
 
@@ -81,12 +98,12 @@ Complete the code maze below to fit a tuned lasso model.
 
 ```{r, lasso_fit_1}
 
-lasso_grid <- grid_regular(penalty())
+lasso_grid <- grid_regular(penalty(), levels = 10)
 
 lasso4_fit_1 <- tune_grid(
-  ____,
-  preprocessor = ____,
-  resamples = ____,
+  mod_lasso,
+  preprocessor = lasso4_rec,
+  resamples = cv_split,
   grid = lasso_grid,
   control = tune::control_resamples(verbose = TRUE,
                                     save_pred = TRUE)
